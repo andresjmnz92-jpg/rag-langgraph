@@ -19,6 +19,8 @@ class Estado(TypedDict):
     pregunta: str
     fragmentos: list
     respuesta: str
+    uso: dict
+
 
 
 def nodo_buscar(estado):
@@ -36,7 +38,11 @@ def nodo_redactar(estado):
             {"role": "user", "content": f"Fragmentos:\n{contexto}\n\nPregunta: {estado['pregunta']}"},
         ],
     )
-    return {"respuesta": respuesta.choices[0].message.content}
+    return {
+        "respuesta": respuesta.choices[0].message.content,
+        "uso": {"entrada": respuesta.usage.prompt_tokens, "salida": respuesta.usage.completion_tokens},
+    }
+
 
 
 grafo = StateGraph(Estado)

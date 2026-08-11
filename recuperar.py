@@ -3,7 +3,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-TABLA = "documentos_v3"
+TABLA = "documentos_v4"
+
 
 def conectar():
     return psycopg.connect(
