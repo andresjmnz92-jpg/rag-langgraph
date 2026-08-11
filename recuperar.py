@@ -22,15 +22,19 @@ def vectorizar(texto):
         raise RuntimeError(f"Ollama devolvio vacio para: {texto!r}")
     return vectores[0]
 
-def buscar(pregunta, limite=10):
+def buscar_fragmentos(pregunta, limite=20):
     vec = vectorizar(pregunta)
     with conectar() as c:
         filas = c.execute(
-            f"SELECT metadata->>'seccion' FROM {TABLA} "
+            f"SELECT text, metadata->>'seccion', metadata->>'citation' FROM {TABLA} "
             "ORDER BY embedding <=> %s::vector LIMIT %s",
             (json.dumps(vec), limite),
         ).fetchall()
-    return [f[0] for f in filas]
+    return [{"texto": t, "seccion": s, "cita": ci} for t, s, ci in filas]
+
+def buscar(pregunta, limite=10):
+    return [f["seccion"] for f in buscar_fragmentos(pregunta, limite)]
+
 
 PREGUNTAS = [
     (1, "¿Qué plazo tiene una entidad para notificar a los individuos afectados por una brecha?", ["164.404"]),
