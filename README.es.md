@@ -16,10 +16,11 @@ midiendo el port en vez del agente.
 
 ## Semana 1: el recuperador, portado y verificado
 
-Las mismas 16 preguntas, el mismo corpus de 581 fragmentos, el mismo modelo de embeddings. Los
-números de n8n se midieron el 10 de agosto; los de Python el 11.
+Las mismas 16 preguntas, el mismo corpus de 581 fragmentos, el mismo modelo de embeddings, la
+misma tabla que consulta el chat de n8n en vivo. Los números de referencia se midieron el 10 de
+agosto; los de Python el 11.
 
-| | n8n | **Python** |
+| | Referencia | **Python** |
 | --- | --- | --- |
 | Recall@10 | 16/16 | **16/16** |
 | MRR@10 | 0,938 | **0,938** |
@@ -28,8 +29,12 @@ números de n8n se midieron el 10 de agosto; los de Python el 11.
 Idénticos hasta el tercer decimal. El port no es una reescritura que casualmente funciona:
 recupera los mismos fragmentos en el mismo orden.
 
-**Para qué sirve:** cuando la semana 2 compare el agente de n8n contra el de LangGraph, el
-recuperador deja de ser una variable. Cualquier diferencia será del agente.
+**Vale la pena ser preciso sobre qué se compara aquí.** Los dos números salen de consultar la
+misma tabla directamente; ninguno pasa por una ejecución de n8n, porque la calidad de la
+recuperación es una propiedad del corpus y del modelo de embeddings, no de la herramienta que los
+llama. La comparación n8n contra LangGraph es sobre el **agente**, y esa cae en la semana 2.
+
+**Para qué sirve:** cuando esa comparación llegue, el recuperador ya no será una variable.
 
 ### Toda la búsqueda es una línea de SQL
 

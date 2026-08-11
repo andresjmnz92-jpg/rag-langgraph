@@ -15,10 +15,10 @@ measuring the port instead of the agent.
 
 ## Week 1: the retriever, ported and verified
 
-Same 16 questions, same corpus of 581 chunks, same embedding model. The n8n numbers were measured
-on 10 August; the Python numbers on 11 August.
+Same 16 questions, same corpus of 581 chunks, same embedding model, same table the live n8n chat
+queries. The reference numbers were measured on 10 August; the Python ones on 11 August.
 
-| | n8n | **Python** |
+| | Reference | **Python** |
 | --- | --- | --- |
 | Recall@10 | 16/16 | **16/16** |
 | MRR@10 | 0.938 | **0.938** |
@@ -27,8 +27,12 @@ on 10 August; the Python numbers on 11 August.
 Identical, to three decimals. The port is not a rewrite that happens to work — it retrieves the
 same chunks in the same order.
 
-**What that buys:** when week 2 compares the n8n agent against the LangGraph one, the retriever is
-no longer a variable. Any difference is the agent.
+**Worth being precise about what this compares.** Both numbers come from querying the same table
+directly; neither goes through an n8n execution, because retrieval quality is a property of the
+corpus and the embedding model, not of the tool that calls them. The n8n-versus-LangGraph
+comparison is about the **agent**, and it lands in week 2.
+
+**What that buys:** when that comparison happens, the retriever is no longer a variable.
 
 ### The whole search is one line of SQL
 
