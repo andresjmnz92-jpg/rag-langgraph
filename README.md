@@ -6,8 +6,8 @@ Rebuilding [my n8n RAG](https://github.com/andresjmnz92-jpg/rag-privado) as Pyth
 LangGraph, exposed through FastAPI and MCP, with the API-versus-local-model comparison measured.
 
 **The first job was not to make it better. It was to make it identical.** Until the Python
-retriever returns the same numbers as the n8n one, any later comparison between the two would be
-measuring the port instead of the agent.
+retriever scores what this corpus already scores, any later comparison between the two agents
+would be measuring the port instead of the agent.
 
 **Stack:** PostgreSQL 17 + pgvector · Ollama with BGE-M3 · psycopg · `gpt-5-mini`
 

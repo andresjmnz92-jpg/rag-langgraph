@@ -7,7 +7,7 @@ agente en LangGraph, expuesto por FastAPI y por MCP, con la comparación medida 
 local.
 
 **El primer trabajo no era mejorarlo. Era hacerlo idéntico.** Mientras el recuperador en Python no
-devuelva los mismos números que el de n8n, cualquier comparación posterior entre los dos estaría
+puntúe lo que este corpus ya puntúa, cualquier comparación posterior entre los dos agentes estaría
 midiendo el port en vez del agente.
 
 **Stack:** PostgreSQL 17 + pgvector · Ollama con BGE-M3 · psycopg · `gpt-5-mini`
