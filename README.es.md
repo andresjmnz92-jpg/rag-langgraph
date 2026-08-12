@@ -159,6 +159,93 @@ lo es** — es un camino más rápido a la misma lectura, con los desacuerdos an
 
 ---
 
+## Semana 2b: el ciclo, medido y rechazado
+
+Un grafo de dos cajas y una flecha no usa nada de LangGraph — el framework existe por los ciclos.
+Así que el agente pasó a tener tres nodos y un camino que vuelve: `buscar → decidir → buscar`.
+
+```mermaid
+graph TD;
+	__start__([pregunta]):::first
+	buscar(buscar)
+	decidir(decidir)
+	redactar(redactar)
+	__end__([respuesta]):::last
+	__start__ --> buscar;
+	buscar --> decidir;
+	decidir -.-> buscar;
+	decidir -.-> redactar;
+	redactar --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
+```
+
+`decidir` lee la pregunta y los 20 fragmentos y devuelve una de dos cosas: `SUFICIENTE`, o una
+consulta de búsqueda nueva escrita con el vocabulario que acaba de leer. Tope de 5 vueltas, el
+mismo `maxIterations` del agente de n8n. **El prompt del redactor no se tocó**: si el puntaje se
+movía, se movía por el ciclo.
+
+![El grafo con el ciclo, en LangGraph Studio](imagenes/grafo-con-ciclo.png)
+
+*LangGraph Studio conectado a un servidor local (`langgraph dev`), con el trazado a LangSmith
+apagado. Cada nodo se puede abrir para ver qué entró y qué salió — los 20 fragmentos, la consulta
+que escribió el juez, el contexto que recibió el redactor.*
+
+### El resultado
+
+| | lineal | **con ciclo** |
+| --- | --- | --- |
+| Contenido correcto | 15/16 | **15/16** |
+| Controles | 4/4 | **4/4** |
+| **Total** | **19/20** | **19/20** |
+| Segundos por consulta | 16,0 | **33,9** |
+| Fichas de entrada, las 20 | 77.446 | **303.099** |
+| Costo de las 20 | $0,030 | **$0,081** |
+
+Las citas subieron de 15/16 a 16/16, y no cuenta: la única que cambió es la 8, que este repo ya
+tenía documentada como la pregunta inestable entre corridas.
+
+**El ciclo no giró ni una vez en las 16 preguntas que tienen respuesta.** Se ve en las fichas —
+todas gastaron unas 7.400 de entrada, que son exactamente dos llamadas: juez y redactor, una
+vuelta. Los cuatro controles gastaron unas 46.000 cada uno, las cinco vueltas completas. **El 61%
+del gasto se fue en las cuatro preguntas cuya respuesta correcta era negarse.** El juez cobra en
+las veinte y solo hace girar el ciclo donde no hay nada que encontrar.
+
+### Por qué, y es más útil que el puntaje
+
+El ciclo se diseñó mirando una pregunta concreta: la 9, que el agente de n8n acertaba y el grafo
+lineal fallaba. La traza mostraba dos búsquedas, y la primera le enseñaba el vocabulario a la
+segunda. Pero **eso se midió sobre el corpus v3**, donde el fragmento con la respuesta estaba en
+el puesto 63. Con v4 llega en el puesto 2.
+
+**Arreglar los datos volvió innecesaria la arquitectura.** El ciclo y un corpus bien preparado no
+se suman: se sustituyen. El ciclo compensa una preparación mala, y se sigue pagando después de
+arreglarla.
+
+### El umbral que tampoco funcionó
+
+Si el ciclo solo desperdicia fichas en las preguntas sin respuesta, la idea obvia es no llamar al
+juez cuando ni el mejor fragmento se parece a la pregunta. La distancia coseno ya la calcula
+Postgres al ordenar; sale gratis. Medida sobre las 20:
+
+| | distancia del mejor fragmento |
+| --- | --- |
+| 16 preguntas con respuesta | 0,287 – **0,497** |
+| 4 controles | **0,477** – 0,548 |
+
+**Se solapan.** Un umbral en 0,47 cortaría los cuatro controles y también la pregunta 8, que sí
+tiene respuesta: 19/20 pasaría a 18/20. La distancia mide qué tan raro suena lo que preguntas, no
+si la respuesta está.
+
+### Y aun así el ciclo se queda en el repo
+
+No porque mejore el puntaje —no lo mejora— sino porque el sistema que este repo describe ahora es
+el que tiene. El experimento con su tabla vale más que el código borrado: **un resultado negativo
+solo enseña si se publica.**
+
+---
+
 ## Cómo se corre
 
 Postgres y Ollama corren en Docker en el servidor y no publican puertos, así que un túnel SSH
@@ -191,8 +278,11 @@ Esas IP de contenedor las asigna Docker y cambian cuando los contenedores se rei
    associate" no aparecen por ningún lado. La recuperación sola puede no alcanzarlo; devolver la
    sección entera cuando un fragmento suyo entra al top es el candidato obvio, y cuesta 4,6 veces
    más fichas, así que se mide antes de adoptarlo.
-3. **FastAPI y MCP sobre la misma función.** Dos fachadas, un solo motor.
-4. **Desplegar con Docker, y medir `gpt-5-mini` contra un modelo local.** Esa comparación es el
+3. **El ciclo contra el corpus v3.** Si la hipótesis es que el ciclo compensa una preparación
+   mala, correrlo sobre v3 —que se conserva a propósito— debería subir el 17/20 que dio ahí el
+   flujo lineal. Es la casilla que falta de una tabla de cuatro.
+4. **FastAPI y MCP sobre la misma función.** Dos fachadas, un solo motor.
+5. **Desplegar con Docker, y medir `gpt-5-mini` contra un modelo local.** Esa comparación es el
    argumento de privacidad con un número en vez de una promesa.
 
 **Sigue abierto, y se dice en vez de esconderse:** estos números son una corrida de cada uno. El
