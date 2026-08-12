@@ -242,6 +242,74 @@ result only teaches if it is published.**
 
 ---
 
+## Week 3a: how far this holds
+
+This system has 581 chunks and no vector index. The question is not how fast it is — it is 5 ms —
+but **at what size an index becomes necessary, and what having one costs.**
+
+The real corpus does not change: rewriting the golden dataset over a million documents costs weeks
+of expert judgement and would destroy the one thing that made week 2's findings findable. The
+volume is generated; **the queries are still the 16 real questions.**
+
+Measured on the server, in a separate container with a Docker memory cap — the public chat lives on
+that machine and a benchmark does not get to take it down.
+([`benchmark/escala.sql`](benchmark/escala.sql))
+
+| vectors | table | no index | with index | recall@10 | index build | index size |
+| --- | --- | --- | --- | --- | --- | --- |
+| **581** (the real ones) | 3.3 MB | **4.8 ms** | — | — | — | — |
+| **10,000** | 54 MB | **111 ms** | **1.2 ms** | **1.000** | 6 s | 78 MB |
+| **100,000** | 535 MB | **1,472 ms** | **5.3 ms** | **1.000** | 84 s | **781 MB** |
+
+Without an index, time tracks row count: 17× the data, 23× the time. With one, 10× the data is 4×
+the time. **The index costs no precision on this corpus — it costs space: 781 MB of index for
+535 MB of data.**
+
+**At 581 vectors the index was not needed, and that is now a number instead of an excuse:** it would
+have meant adding 78 MB to save 3 milliseconds.
+
+### What extrapolates and what does not
+
+A sequential scan is linear by definition, so scan time and storage can be computed. **This is
+arithmetic on the measured row, not measurement:**
+
+| | table | index | no index |
+| --- | --- | --- | --- |
+| 1,000,000 | 5.4 GB | 7.8 GB | ~15 s |
+| 10,000,000 | 54 GB | 78 GB | ~2.5 min |
+| 100,000,000 | 535 GB | 781 GB | ~25 min |
+
+**Indexed search does not extrapolate, and that is the part worth knowing.** HNSW is fast while the
+graph fits in memory; once it does not, every hop turns from a RAM read into a random disk read,
+which is not "slower" but a different regime. The same break showed up during the build: pgvector
+warns — `hnsw graph no longer fits into maintenance_work_mem` — and takes over twice as long.
+
+That point *can* be computed from what was measured. **The index weighs 7.81 KB per vector.** With
+6.1 GB of RAM free on this server, it stops fitting at roughly **780,000 vectors**. And the whole
+disk is 38 GB, so at ten million the table alone does not fit.
+
+### The two failures that raised no error
+
+**The data generator broke the experiment silently.** The first fill used a lateral subquery that
+depended on nothing in the row, so Postgres evaluated it once and reused the same noise: 100,000
+rows that were about 1,700 distinct vectors. No errors, no warnings, plausible size, index built,
+queries fast. What gave it away was a recall of **0.063** — a number absurd enough to force a
+second look. At 0.85 it would have been published.
+
+**An index on a bloated table performs worse than no index.** Dropping from 100,000 rows to 10,000,
+plain `VACUUM` does not return the space: the table still occupied 586 MB holding 10,000 rows, and
+the same index took **125 ms per query**. After `VACUUM FULL`: **1.2 ms**. A hundredfold, without
+touching the index.
+
+### What this setup cannot claim
+
+The 100,000 vectors are noised copies of 581 originals, so they form 581 neighbourhoods; a real
+corpus that size would carry far more topical variety. **The recall of 1.000 is optimistic because
+of that.** Latency and size do not depend on the distribution and hold; recall at scale on real
+data remains unknown.
+
+---
+
 ## Running it
 
 Postgres and Ollama run in Docker on the server and publish no ports, so an SSH tunnel reaches

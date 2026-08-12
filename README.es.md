@@ -246,6 +246,73 @@ solo enseña si se publica.**
 
 ---
 
+## Semana 3a: cuánto aguanta esto
+
+Este sistema tiene 581 fragmentos y no tiene índice vectorial. La pregunta no es cuánto tarda —
+tarda 5 ms— sino **a partir de qué tamaño hace falta un índice, y qué cuesta tenerlo.**
+
+El corpus real no cambia: reescribir el golden dataset sobre un millón de documentos cuesta
+semanas de criterio experto y se perdería lo único que permitió encontrar los hallazgos de la
+semana 2. El volumen se genera; **las consultas siguen siendo las 16 preguntas reales.**
+
+Medido en el servidor, en un contenedor aparte con límite de memoria: el chat público vive en esa
+misma máquina y un benchmark no puede tumbarlo. ([`benchmark/escala.sql`](benchmark/escala.sql))
+
+| vectores | tabla | sin índice | con índice | recall@10 | construir el índice | ocupa |
+| --- | --- | --- | --- | --- | --- | --- |
+| **581** (los reales) | 3,3 MB | **4,8 ms** | — | — | — | — |
+| **10.000** | 54 MB | **111 ms** | **1,2 ms** | **1,000** | 6 s | 78 MB |
+| **100.000** | 535 MB | **1.472 ms** | **5,3 ms** | **1,000** | 84 s | **781 MB** |
+
+Sin índice el tiempo sigue al número de filas: diecisiete veces más datos, veintitrés veces más
+lento. Con índice, diez veces más datos son cuatro veces más lento. **El índice no cuesta
+precisión en este corpus — cuesta espacio: 781 MB de índice para 535 MB de datos.**
+
+**Con 581 vectores el índice no hacía falta, y ahora eso es un número en vez de una excusa:**
+habría sido añadir 78 MB para ahorrar 3 milisegundos.
+
+### Lo que se proyecta y lo que no
+
+Un escaneo secuencial es lineal por definición, así que la búsqueda sin índice y el
+almacenamiento se calculan. **Esto es aritmética sobre la fila medida, no medición:**
+
+| | tabla | índice | sin índice |
+| --- | --- | --- | --- |
+| 1.000.000 | 5,4 GB | 7,8 GB | ~15 s |
+| 10.000.000 | 54 GB | 78 GB | ~2,5 min |
+| 100.000.000 | 535 GB | 781 GB | ~25 min |
+
+**La búsqueda *con* índice no se proyecta, y ahí está lo que importa.** HNSW es rápido mientras el
+grafo quepa en memoria; cuando no cabe, cada salto del grafo pasa de leer RAM a leer disco al
+azar, y eso no es "más lento" sino otro régimen. El mismo quiebre se vio hoy al construirlo:
+pgvector avisa —`hnsw graph no longer fits into maintenance_work_mem`— y tarda más del doble.
+
+Ese punto sí se calcula con lo medido. **El índice pesa 7,81 KB por vector.** Con 6,1 GB de RAM
+disponible en este servidor, deja de caber alrededor de los **780.000 vectores**. Y el disco entero
+son 38 GB, así que a diez millones no cabe ni la tabla.
+
+### Los dos fallos que no dieron ningún error
+
+**El generador de datos rompió el experimento en silencio.** El primer relleno usaba una
+subconsulta lateral que no dependía de la fila, así que Postgres la evaluó una vez y reutilizó el
+mismo ruido: 100.000 filas que eran unos 1.700 vectores distintos. Cero errores, cero avisos,
+tamaño plausible, índice construido, consultas rápidas. Lo delató un recall de **0,063** — un
+número tan absurdo que obligó a mirar. Con 0,85 se habría publicado.
+
+**Un índice sobre una tabla hinchada rinde peor que ningún índice.** Al bajar de 100.000 a 10.000
+filas, `VACUUM` normal no devuelve el espacio: la tabla seguía ocupando 586 MB con 10.000 filas, y
+el mismo índice tardaba **125 ms por consulta**. Tras `VACUUM FULL`: **1,2 ms**. Cien veces, sin
+tocar el índice.
+
+### Lo que este montaje no puede decir
+
+Los 100.000 vectores son copias con ruido de 581 originales, así que tienen 581 vecindarios; un
+corpus real de ese tamaño tendría mucha más variedad temática. **El recall de 1,000 es optimista
+por eso.** La latencia y el tamaño no dependen de la distribución y se sostienen; el recall a
+escala, medido sobre datos reales, sigue sin conocerse.
+
+---
+
 ## Cómo se corre
 
 Postgres y Ollama corren en Docker en el servidor y no publican puertos, así que un túnel SSH
