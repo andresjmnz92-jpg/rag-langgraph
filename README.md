@@ -52,6 +52,23 @@ The agent is two nodes and one edge: `search → write`. The five system-prompt 
 from the n8n workflow word for word — changing them would turn a framework comparison into a
 prompt comparison.
 
+```mermaid
+graph TD;
+	__start__([question]):::first
+	buscar(search)
+	redactar(write)
+	__end__([answer]):::last
+	__start__ --> buscar;
+	buscar --> redactar;
+	redactar --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
+```
+
+*That diagram is not drawn by hand: `agente.get_graph().draw_mermaid()` emits it from the compiled
+graph. Documentation that cannot drift from the code is the only kind that survives.*
+
 **One of those rules stops being a rule here.** Rule 1 tells the model to *always* search before
 answering. In n8n that is a request the model is free to ignore. In a graph, `START → search →
 write` means the writer cannot run without retrieved chunks. **The same instruction moves from
@@ -64,12 +81,23 @@ even when the content is right.
 
 | | corpus v3 | **corpus v4** |
 | --- | --- | --- |
-| Cited the right section | 14/16 | **16/16** |
+| Cited the right section | 14/16 | **15–16/16** |
 | Content correct | 14/16 | **15/16** |
 | Controls (silence is correct) | 4/4 | **4/4** |
 | **Total** | **17/20** | **19/20** |
-| Cost of all 20 | $0.029 | **$0.027** |
-| Seconds per query | 16.8 | 15.4 |
+| Cost of all 20 | $0.028–0.029 | **$0.027–0.030** |
+
+**The ranges are not hedging — they are the measurement.** v4 was run twice and scored 16/16 and
+15/16 on citations. Same table, same model, same prompt. Reporting a single number would have
+implied a precision this does not have.
+
+What the repeat run separates cleanly:
+
+- **Q9 fails in every v3 run and passes in every v4 run.** That is not noise — it is the chunk
+  moving from rank 63 to rank 2, and ranks are deterministic.
+- **Q8 flips between runs in both corpora.** It is the only unstable question, and it is the only
+  one with three expected sections; the model reaches for § 164.304 (*Definitions* of the Security
+  Rule), which sits semantically next to all three.
 
 ### The finding: recall@10 was reporting 100% on a system delivering 81%
 

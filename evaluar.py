@@ -6,12 +6,15 @@ necesita a alguien que sepa leerla. El script comprueba lo que sí es objetivo
 (¿citó la sección correcta?) y deja la casilla de contenido vacía para que la
 llene una persona, con la respuesta verificada al lado.
 
-Escribe siempre el mismo archivo: git ya guarda el historial de versiones.
+Un archivo por corrida, con su fecha y su corpus en el nombre: un resultado sin
+las condiciones que lo produjeron no es un resultado.
 """
 
-import sys, time
+import os, sys, time
+from datetime import date
 from golden import PREGUNTAS
 from agente import agente
+from recuperar import TABLA
 
 PRECIO_ENTRADA = 0.13 / 1_000_000   # gpt-5-mini, verificado el 10 ago 2026
 PRECIO_SALIDA = 1.00 / 1_000_000
@@ -44,8 +47,10 @@ def main():
     salida_t = sum(f["uso"]["salida"] for f in filas)
     costo = entrada * PRECIO_ENTRADA + salida_t * PRECIO_SALIDA
 
-    with open("RESULTADOS.md", "w", encoding="utf-8") as f:
-        f.write("# LangGraph — 20 preguntas\n\n")
+    os.makedirs("resultados", exist_ok=True)
+    ruta = f"resultados/{date.today()}-{TABLA}.md"
+    with open(ruta, "w", encoding="utf-8") as f:
+        f.write(f"# {TABLA} — 20 preguntas · {date.today()}\n\n")
         f.write(f"- Controles superados (automático): **{sum(1 for c in controles if c['ok'])}/4**\n")
         f.write(f"- Citó la sección esperada (automático): **{sum(1 for c in conresp if c['ok'])}/16**\n")
         f.write(f"- Segundos por consulta: **{sum(x['segundos'] for x in filas)/len(filas):.1f}** de media\n")
@@ -61,7 +66,8 @@ def main():
 
     print(f"\nControles {sum(1 for c in controles if c['ok'])}/4 · "
           f"Citas {sum(1 for c in conresp if c['ok'])}/16 · ${costo:.3f}")
-    print("Escrito RESULTADOS.md — te toca llenar las casillas de Contenido.")
+    print(f"Escrito {ruta} — te toca llenar las casillas de Contenido.")
+
 
 
 if __name__ == "__main__":

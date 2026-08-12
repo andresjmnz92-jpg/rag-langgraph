@@ -55,6 +55,23 @@ El agente son dos nodos y una flecha: `buscar → redactar`. Las cinco reglas de
 están copiadas del workflow de n8n palabra por palabra — cambiarlas convertiría una comparación
 de frameworks en una comparación de prompts.
 
+```mermaid
+graph TD;
+	__start__([pregunta]):::first
+	buscar(buscar)
+	redactar(redactar)
+	__end__([respuesta]):::last
+	__start__ --> buscar;
+	buscar --> redactar;
+	redactar --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
+```
+
+*Ese diagrama no está dibujado a mano: lo emite `agente.get_graph().draw_mermaid()` desde el grafo
+compilado. La documentación que no puede desfasarse del código es la única que sobrevive.*
+
 **Una de esas reglas deja de ser una regla aquí.** La número 1 le pide al modelo que SIEMPRE
 busque antes de responder. En n8n eso es una petición que el modelo puede ignorar. En un grafo,
 `START → buscar → redactar` significa que el redactor no puede ejecutarse sin fragmentos
@@ -68,12 +85,23 @@ fallo aunque el contenido sea correcto.
 
 | | corpus v3 | **corpus v4** |
 | --- | --- | --- |
-| Citó la sección correcta | 14/16 | **16/16** |
+| Citó la sección correcta | 14/16 | **15–16/16** |
 | Contenido correcto | 14/16 | **15/16** |
 | Controles (callarse es lo correcto) | 4/4 | **4/4** |
 | **Total** | **17/20** | **19/20** |
-| Costo de las 20 | $0,029 | **$0,027** |
-| Segundos por consulta | 16,8 | 15,4 |
+| Costo de las 20 | $0,028–0,029 | **$0,027–0,030** |
+
+**Los rangos no son una evasiva: son la medición.** v4 se corrió dos veces y dio 16/16 y 15/16 en
+citas. La misma tabla, el mismo modelo, el mismo prompt. Publicar un número solo habría dado a
+entender una precisión que esto no tiene.
+
+Lo que la segunda corrida separa limpiamente:
+
+- **La 9 falla en todas las corridas de v3 y acierta en todas las de v4.** Eso no es ruido: es el
+  fragmento pasando del puesto 63 al 2, y los puestos son deterministas.
+- **La 8 cambia entre corridas en los dos corpus.** Es la única pregunta inestable, y es la única
+  con tres secciones esperadas; el modelo se va a § 164.304 (*Definitions* de la Security Rule),
+  que está semánticamente pegada a las tres.
 
 ### El hallazgo: recall@10 reportaba 100% sobre un sistema que entregaba 81%
 
