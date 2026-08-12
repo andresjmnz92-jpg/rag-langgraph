@@ -155,6 +155,93 @@ it is a faster path to the same reading, with the disagreements recorded.
 
 ---
 
+## Week 2b: the loop, measured and rejected
+
+A graph of two boxes and one arrow uses nothing of LangGraph — the framework exists for cycles. So
+the agent grew a third node and a path that goes back: `search → judge → search`.
+
+```mermaid
+graph TD;
+	__start__([question]):::first
+	buscar(search)
+	decidir(judge)
+	redactar(write)
+	__end__([answer]):::last
+	__start__ --> buscar;
+	buscar --> decidir;
+	decidir -.-> buscar;
+	decidir -.-> redactar;
+	redactar --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
+```
+
+`judge` reads the question and the 20 chunks and returns one of two things: `SUFICIENTE`, or a
+fresh search query written in the vocabulary it just read. Capped at 5 turns, the same
+`maxIterations` as the n8n agent. **The writer's prompt was left untouched** — if the score moved,
+it moved because of the loop.
+
+![The graph with its loop, in LangGraph Studio](imagenes/grafo-con-ciclo.png)
+
+*LangGraph Studio attached to a local server (`langgraph dev`), with LangSmith tracing off. Every
+node can be opened to see what went in and what came out — the 20 chunks, the query the judge
+wrote, the context the writer received.*
+
+### The result
+
+| | linear | **with loop** |
+| --- | --- | --- |
+| Content correct | 15/16 | **15/16** |
+| Controls | 4/4 | **4/4** |
+| **Total** | **19/20** | **19/20** |
+| Seconds per query | 16.0 | **33.9** |
+| Input tokens, all 20 | 77,446 | **303,099** |
+| Cost of the 20 | $0.030 | **$0.081** |
+
+Citations went from 15/16 to 16/16, and it does not count: the only one that changed is question
+8, which this repo already documents as the unstable one across runs.
+
+**The loop never turned once on the 16 questions that have an answer.** The tokens show it — each
+spent about 7,400 on input, exactly two calls: judge and writer, one turn. The four controls spent
+about 46,000 each, the full five turns. **61% of the spend went to the four questions whose correct
+answer was to refuse.** The judge charges on all twenty and only spins the loop where there is
+nothing to find.
+
+### Why, and it is more useful than the score
+
+The loop was designed around one specific question: number 9, which the n8n agent got right and the
+linear graph got wrong. The trace showed two searches, the first teaching the second its
+vocabulary. But **that was measured on corpus v3**, where the answering chunk sat at rank 63. Under
+v4 it arrives at rank 2.
+
+**Fixing the data made the architecture unnecessary.** A loop and a well-prepared corpus do not add
+up; they substitute for each other. The loop compensates for bad preparation, and you keep paying
+for it after the preparation is fixed.
+
+### The threshold that did not work either
+
+If the loop only wastes tokens on questions with no answer, the obvious move is to skip the judge
+when not even the closest chunk resembles the question. Postgres already computes cosine distance
+while ordering, so the signal is free. Measured across all 20:
+
+| | distance of the closest chunk |
+| --- | --- |
+| 16 questions with an answer | 0.287 – **0.497** |
+| 4 controls | **0.477** – 0.548 |
+
+**They overlap.** A threshold at 0.47 would cut all four controls and also question 8, which does
+have an answer: 19/20 would become 18/20. Distance measures how unusual your phrasing is, not
+whether the answer is there.
+
+### And the loop stays in the repo anyway
+
+Not because it improves the score — it does not — but because the system this repo describes is now
+the system it has. The experiment with its table is worth more than the deleted code: **a negative
+result only teaches if it is published.**
+
+---
+
 ## Running it
 
 Postgres and Ollama run in Docker on the server and publish no ports, so an SSH tunnel reaches
@@ -187,8 +274,11 @@ gives the current ones.
    nowhere in it. Retrieval alone may not reach it; returning the whole section when a chunk from
    it ranks is the obvious candidate, and it costs 4.6× the tokens, so it gets measured before it
    gets adopted.
-3. **FastAPI and MCP over the same function.** Two façades, one engine.
-4. **Deploy with Docker, and measure `gpt-5-mini` against a local model.** That comparison is the
+3. **The loop against corpus v3.** If the hypothesis is that a loop compensates for bad
+   preparation, running it on v3 — kept on purpose — should lift the 17/20 the linear flow scored
+   there. It is the missing cell of a four-cell table.
+4. **FastAPI and MCP over the same function.** Two façades, one engine.
+5. **Deploy with Docker, and measure `gpt-5-mini` against a local model.** That comparison is the
    privacy argument with a number attached instead of a claim.
 
 **Still open, and named rather than buried:** these numbers are one run each. The model is not
