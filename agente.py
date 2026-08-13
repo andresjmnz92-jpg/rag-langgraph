@@ -8,12 +8,11 @@ from recuperar import buscar_fragmentos
 # con dos vueltas. Es el freno de mano por si el juez nunca se da por satisfecho.
 MAX_VUELTAS = 5
 
-# 20 se heredo del chat de n8n; nadie lo midio. Con el corpus v4 el fragmento
-# que responde llega en el puesto 2, asi que los otros 18 se pagan en cada
-# consulta sin saber si aportan. Por variable de entorno para poder correr las
-# dos y comparar sin editar el archivo entre corridas. Cuando el numero decida,
-# esto vuelve a ser una constante.
-TOP_K = int(os.environ.get("TOP_K", 20))
+# 20 se heredo del chat de n8n y nadie lo midio. Medido el 12 ago: con 5 el
+# puntaje automatico no se movio y la entrada bajo 3,4 veces, asi que 5 es el
+# valor del sistema. Sigue leyendose del entorno solo mientras la semana 4 tenga
+# que correr las dos para comparar contra el modelo local; despues, constante.
+TOP_K = int(os.environ.get("TOP_K", 5))
 
 # Las mismas cinco reglas del workflow de n8n, palabra por palabra. Si se
 # cambian, la comparacion deja de medir el framework y pasa a medir el prompt.
