@@ -438,6 +438,10 @@ tokens each: all of them fit. The four controls spend 10,006–19,719 — none o
 those are the only questions where the loop actually turns and piles up chunks. A local model
 measured at the default context would look fine on the sixteen and fail the four in silence.
 
+**Adopted: `TOP_K` defaults to 5.** The value the measurement chose is the value the system runs
+on — a repo whose README publishes one number while its code runs another is worse than not
+measuring. The environment variable stays only while week 4 needs to run both.
+
 ---
 
 ## What's next

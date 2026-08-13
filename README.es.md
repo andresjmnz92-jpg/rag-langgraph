@@ -443,6 +443,10 @@ ninguno cabe, porque son las únicas preguntas donde el ciclo gira de verdad y a
 Un modelo local medido con el contexto por defecto se vería bien en las dieciséis y fallaría
 callado en las cuatro.
 
+**Adoptado: `TOP_K` vale 5 por defecto.** El valor que eligió la medición es con el que corre el
+sistema — un repo cuyo README publica un número mientras su código corre otro es peor que no haber
+medido. La variable de entorno se queda solo mientras la semana 4 tenga que correr las dos.
+
 ---
 
 ## Qué sigue
