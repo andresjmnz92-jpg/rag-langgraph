@@ -406,6 +406,40 @@ gives the current ones.
 
 ---
 
+## The default nobody measured
+
+`topK = 20` came from the n8n chat and rode into the port unquestioned. Under corpus v4 the
+answering chunk arrives at rank 2 — so eighteen chunks get paid for on every single query, and
+nobody had checked what they buy.
+
+Same corpus, same prompt, same 20 questions. Only `TOP_K` changed:
+
+| | topK 20 | **topK 5** |
+| --- | --- | --- |
+| Controls (automatic) | 4/4 | **4/4** |
+| Cited the expected section (automatic) | 16/16 | **16/16** |
+| Input tokens, all 20 | 303,099 | **88,192** |
+| Output tokens | 41,738 | **45,336** |
+| Cost of the 20 | $0.081 | **$0.057** |
+| Seconds per query | 33.9 | **27.5** |
+
+**3.4× less input for the same automatic score** — and output went *up*. With less context the
+model writes slightly longer answers. The saving is real; "everything improved" would be a lie.
+
+**Declared rather than buried: the content column was not graded on this run.** Both automatic
+measures are substring tests — did the expected section number appear, did the refusal phrase
+appear. Whether the sixteen answers still say the right thing takes a human reading them, and
+nobody has. This table supports "the automatic score did not move". It does not support "quality
+held".
+
+**And it changes what week 4 has to watch.** Ollama's default context is 4,096 tokens and it
+truncates past that without a word. The 16 questions with an answer now spend 1,731–2,429 input
+tokens each: all of them fit. The four controls spend 10,006–19,719 — none of them do, because
+those are the only questions where the loop actually turns and piles up chunks. A local model
+measured at the default context would look fine on the sixteen and fail the four in silence.
+
+---
+
 ## What's next
 
 1. **A retrieval metric that measures the chunk, not the section.** The current one reported 16/16

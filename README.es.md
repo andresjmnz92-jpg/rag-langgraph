@@ -409,6 +409,42 @@ Esas IP de contenedor las asigna Docker y cambian cuando los contenedores se rei
 
 ---
 
+## El valor por defecto que nadie midió
+
+`topK = 20` venía del chat de n8n y entró al port sin que nadie lo cuestionara. Con el corpus v4
+el fragmento que responde llega en el puesto 2 — o sea que dieciocho fragmentos se pagan en cada
+consulta, sin haber comprobado qué compran.
+
+Mismo corpus, mismo prompt, las mismas 20 preguntas. Solo cambió `TOP_K`:
+
+| | topK 20 | **topK 5** |
+| --- | --- | --- |
+| Controles (automático) | 4/4 | **4/4** |
+| Citó la sección esperada (automático) | 16/16 | **16/16** |
+| Fichas de entrada, las 20 | 303.099 | **88.192** |
+| Fichas de salida | 41.738 | **45.336** |
+| Costo de las 20 | $0,081 | **$0,057** |
+| Segundos por consulta | 33,9 | **27,5** |
+
+**3,4 veces menos entrada para el mismo puntaje automático** — y la salida *subió*. Con menos
+contexto el modelo escribe respuestas algo más largas. El ahorro es real; decir "todo mejoró"
+sería mentira.
+
+**Se declara en vez de esconderse: la columna de contenido no se calificó en esta corrida.** Las
+dos medidas automáticas son una prueba de subcadena — si apareció el número de sección esperado,
+si apareció la frase de negativa. Saber si las dieciséis respuestas siguen diciendo lo correcto
+exige que un humano las lea, y nadie lo ha hecho. Esta tabla sostiene "el puntaje automático no se
+movió". No sostiene "la calidad se mantuvo".
+
+**Y cambia lo que la semana 4 tiene que vigilar.** El contexto por defecto de Ollama es de 4.096
+fichas y trunca lo que pase de ahí sin decir nada. Las 16 preguntas con respuesta gastan hoy entre
+1.731 y 2.429 fichas de entrada: todas caben. Los cuatro controles gastan entre 10.006 y 19.719 —
+ninguno cabe, porque son las únicas preguntas donde el ciclo gira de verdad y acumula fragmentos.
+Un modelo local medido con el contexto por defecto se vería bien en las dieciséis y fallaría
+callado en las cuatro.
+
+---
+
 ## Qué sigue
 
 1. **Una métrica de recuperación que mida el fragmento, no la sección.** La actual reportaba 16/16

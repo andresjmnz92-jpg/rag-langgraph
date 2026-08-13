@@ -1,3 +1,4 @@
+import os
 from typing import Annotated, TypedDict
 from openai import OpenAI
 from langgraph.graph import StateGraph, START, END
@@ -6,6 +7,13 @@ from recuperar import buscar_fragmentos
 # El mismo tope que el agente de n8n. No es una meta: la ejecucion 551 acerto
 # con dos vueltas. Es el freno de mano por si el juez nunca se da por satisfecho.
 MAX_VUELTAS = 5
+
+# 20 se heredo del chat de n8n; nadie lo midio. Con el corpus v4 el fragmento
+# que responde llega en el puesto 2, asi que los otros 18 se pagan en cada
+# consulta sin saber si aportan. Por variable de entorno para poder correr las
+# dos y comparar sin editar el archivo entre corridas. Cuando el numero decida,
+# esto vuelve a ser una constante.
+TOP_K = int(os.environ.get("TOP_K", 20))
 
 # Las mismas cinco reglas del workflow de n8n, palabra por palabra. Si se
 # cambian, la comparacion deja de medir el framework y pasa a medir el prompt.
@@ -63,7 +71,7 @@ def nodo_buscar(estado):
     # n8n: si la segunda busqueda sale peor, lo bueno de la primera no se pierde.
     ya = estado.get("fragmentos") or []
     vistos = {f["texto"] for f in ya}
-    nuevos = buscar_fragmentos(estado.get("consulta") or estado["pregunta"], 20)
+    nuevos = buscar_fragmentos(estado.get("consulta") or estado["pregunta"], TOP_K)
     return {"fragmentos": ya + [f for f in nuevos if f["texto"] not in vistos],
             "vueltas": estado.get("vueltas", 0) + 1}
 
