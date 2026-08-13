@@ -13,7 +13,7 @@ las condiciones que lo produjeron no es un resultado.
 import os, sys, time
 from datetime import date
 from golden import PREGUNTAS
-from agente import agente
+from agente import agente, TOP_K
 from recuperar import TABLA
 
 PRECIO_ENTRADA = 0.13 / 1_000_000   # gpt-5-mini, verificado el 10 ago 2026
@@ -48,9 +48,11 @@ def main():
     costo = entrada * PRECIO_ENTRADA + salida_t * PRECIO_SALIDA
 
     os.makedirs("resultados", exist_ok=True)
-    ruta = f"resultados/{date.today()}-{TABLA}.md"
+    # El topK va en el nombre: sin el, dos corridas del mismo dia sobre la misma
+    # tabla se pisan, y la segunda borraria el resultado de la primera.
+    ruta = f"resultados/{date.today()}-{TABLA}-top{TOP_K}.md"
     with open(ruta, "w", encoding="utf-8") as f:
-        f.write(f"# {TABLA} — 20 preguntas · {date.today()}\n\n")
+        f.write(f"# {TABLA} — 20 preguntas · topK {TOP_K} · {date.today()}\n\n")
         f.write(f"- Controles superados (automático): **{sum(1 for c in controles if c['ok'])}/4**\n")
         f.write(f"- Citó la sección esperada (automático): **{sum(1 for c in conresp if c['ok'])}/16**\n")
         f.write(f"- Segundos por consulta: **{sum(x['segundos'] for x in filas)/len(filas):.1f}** de media\n")
