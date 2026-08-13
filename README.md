@@ -310,6 +310,80 @@ data remains unknown.
 
 ---
 
+## Week 3b: two façades, one engine
+
+Until now the system only ran by executing Python by hand. It now has two doors, and neither of them
+touches the engine.
+
+```
+recuperar.py            agente.py
+  buscar_fragmentos()     agente.invoke()
+        ↑         ↖            ↑
+     api.py            mcp_server.py
+    (FastAPI)             (stdio)
+```
+
+**Both import the functions directly.** The MCP server does not call the API over HTTP: they are
+sibling consumers of the same module, not a chain. When the engine changes, both change — and there
+is no network hop in between that can fail.
+
+### The API
+
+| Route | Returns | Cost |
+| --- | --- | --- |
+| `GET /health` | the state of Postgres and Ollama **separately** | $0 |
+| `POST /v1/buscar` | chunks with their section and citation | $0 |
+| `POST /v1/preguntar` | answer, chunks, loop turns, tokens spent | ~$0.004 |
+
+**They are split on purpose.** `/v1/buscar` is deterministic, instant and free; `/v1/preguntar` is
+non-deterministic, slow and costs money. Measuring the two halves separately is what found week 2's
+bug, and this is that lesson turned into architecture: **finding out whether the database answers
+should not cost an LLM call.**
+
+`/health` runs a real query against Postgres and a real embedding against Ollama. Returning a bare
+`{"status": "ok"}` is precisely the failure this project has already hit twice.
+
+### The MCP server exposes one tool, not two
+
+`buscar_hipaa(pregunta, limite=20)`. **It does not expose `preguntar`, and that is a decision.** On
+the other side of an MCP server sits Claude, which already writes; handing it `preguntar` would mean
+paying `gpt-5-mini` to produce something the model on the other end was going to produce anyway,
+with a worse writer in the middle. **The tool worth handing a model is the one it cannot do alone:
+search a private corpus.**
+
+The tool description carries a line that looks redundant and is not — *"the question may arrive in
+Spanish, do NOT translate it"*. Without it, a helpful model translates to English before calling and
+breaks exactly what makes this system worth showing.
+
+### The two failures that building this surfaced
+
+**`psycopg` had no connection timeout.** With the tunnel down, `/health` did not return an error: it
+hung for **over 130 seconds**. A health check that hangs reads as "slow" rather than "down", which is
+the worse of the two readings. And it was not an API problem: **every script in this repo hung the
+same way** since week 1, and it never showed because the tunnel never dropped while something was
+running. With `connect_timeout=5`: **503 in 7 seconds, naming which of the two failed.**
+
+**`load_dotenv()` looked for `.env` in the current directory.** Claude launches the MCP server from
+its own folder, so it would have died on first start with a `KeyError`. Fixed with a path relative
+to the file.
+
+Neither raised an error while being built. Both surfaced from **deliberately running the system
+broken** — the same test the server's watchdog got.
+
+### The tests
+
+Four, using FastAPI's `TestClient`, in 7 seconds and **without calling OpenAI**: health, empty
+question (422), out-of-range limit (422), and a real search asserting every chunk carries text,
+section and citation.
+
+`/v1/preguntar` is **not tested automatically**: each run would spend money. It gets tested by hand
+from `/docs`, and the repo says so rather than pretending otherwise.
+
+Full design, including what was deliberately left out:
+[`docs/2026-08-12-api-y-mcp-diseno.md`](docs/2026-08-12-api-y-mcp-diseno.md).
+
+---
+
 ## Running it
 
 Postgres and Ollama run in Docker on the server and publish no ports, so an SSH tunnel reaches
@@ -345,7 +419,8 @@ gives the current ones.
 3. **The loop against corpus v3.** If the hypothesis is that a loop compensates for bad
    preparation, running it on v3 — kept on purpose — should lift the 17/20 the linear flow scored
    there. It is the missing cell of a four-cell table.
-4. **FastAPI and MCP over the same function.** Two façades, one engine.
+4. **The evaluator in CI.** Every change runs the 20 questions and reports if the score drops,
+   instead of relying on remembering to run them by hand.
 5. **Deploy with Docker, and measure `gpt-5-mini` against a local model.** That comparison is the
    privacy argument with a number attached instead of a claim.
 

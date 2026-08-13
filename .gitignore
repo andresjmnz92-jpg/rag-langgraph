@@ -2,4 +2,5 @@
 .venv/
 __pycache__/
 .langgraph_api/
+.pytest_cache/
 RESULTADOS.md

@@ -1,17 +1,24 @@
 import os, json, requests, psycopg
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+# Con ruta absoluta a proposito: el servidor MCP lo arranca Claude desde su
+# propio directorio, y un load_dotenv() a secas busca el .env en el cwd.
+load_dotenv(Path(__file__).parent / ".env")
 
 TABLA = "documentos_v4"
 
 
 def conectar():
+    # connect_timeout no sobra: sin el, con el tunel caido psycopg espera 130 s
+    # antes de rendirse. Un chequeo de salud que se cuelga se lee como "lento"
+    # en vez de "caido", que es la peor de las dos lecturas.
     return psycopg.connect(
         host="127.0.0.1", port=5433,
         dbname=os.environ["POSTGRES_DB"],
         user=os.environ["POSTGRES_USER"],
         password=os.environ["POSTGRES_PASSWORD"],
+        connect_timeout=5,
     )
 
 def vectorizar(texto):
