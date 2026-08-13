@@ -313,6 +313,80 @@ escala, medido sobre datos reales, sigue sin conocerse.
 
 ---
 
+## Semana 3b: dos fachadas, un solo motor
+
+Hasta aquí el sistema solo funcionaba ejecutando Python a mano. Ahora tiene dos puertas, y ninguna
+de las dos toca el motor.
+
+```
+recuperar.py            agente.py
+  buscar_fragmentos()     agente.invoke()
+        ↑         ↖            ↑
+     api.py            mcp_server.py
+    (FastAPI)             (stdio)
+```
+
+**Las dos importan las funciones directamente.** El MCP no llama a la API por HTTP: son consumidores
+hermanos del mismo módulo, no una cadena. Si el motor cambia, cambian los dos, y no hay una red en
+medio que pueda caerse.
+
+### La API
+
+| Ruta | Devuelve | Costo |
+| --- | --- | --- |
+| `GET /health` | el estado de Postgres y de Ollama **por separado** | $0 |
+| `POST /v1/buscar` | los fragmentos con su sección y su cita | $0 |
+| `POST /v1/preguntar` | respuesta, fragmentos, vueltas del ciclo y fichas gastadas | ~$0,004 |
+
+**Están separadas a propósito.** `/v1/buscar` es determinista, instantáneo y gratis; `/v1/preguntar`
+es no determinista, lento y cuesta dinero. Medir las dos mitades por separado fue lo que encontró el
+fallo de la semana 2, y esta es esa lección puesta en la arquitectura: **saber si la base de datos
+responde no debería costar una llamada a un LLM.**
+
+`/health` hace una consulta real a Postgres y un embedding real contra Ollama. Devolver `{"status":
+"ok"}` a secas es justo el fallo que este proyecto ya pisó dos veces.
+
+### El MCP expone una herramienta, no dos
+
+`buscar_hipaa(pregunta, limite=20)`. **No expone `preguntar`, y es una decisión.** Al otro lado del
+MCP está Claude, que ya redacta; ofrecerle `preguntar` sería pagar `gpt-5-mini` para escribir algo
+que el modelo del otro lado iba a escribir igual, y meter un redactor peor en medio. **La
+herramienta que se le ofrece a un modelo es la que él no puede hacer solo: buscar en un corpus
+privado.**
+
+La descripción de la herramienta incluye una línea que parece de más y no lo es — *"la pregunta
+puede venir en español, NO hay que traducirla"*. Sin ella, un modelo servicial traduce al inglés
+antes de llamar y rompe exactamente lo que hace especial a este sistema.
+
+### Los dos fallos que encontró construir esto
+
+**`psycopg` no tenía límite de tiempo.** Con el túnel caído, `/health` no devolvía un error: se
+quedaba colgado **más de 130 segundos**. Un chequeo de salud que se cuelga se lee como "lento" en
+vez de "caído", que es la peor de las dos lecturas. Y no era de la API: **cualquier script de este
+repo se colgaba igual** desde la semana 1, y nunca se vio porque el túnel nunca se cayó mientras
+algo corría. Con `connect_timeout=5`: **503 en 7 segundos, diciendo cuál de los dos falló.**
+
+**`load_dotenv()` buscaba el `.env` en el directorio actual.** El servidor MCP lo arranca Claude
+desde su propia carpeta, así que habría fallado en el primer arranque con un `KeyError`. Se arregla
+con una ruta absoluta relativa al archivo.
+
+Ninguno de los dos dio error mientras se construía. Aparecieron al **probar el sistema roto a
+propósito**, que es la misma prueba que se le hizo al vigilante del servidor.
+
+### Las pruebas
+
+Cuatro, con el `TestClient` de FastAPI, en 7 segundos y **sin llamar a OpenAI**: salud, pregunta
+vacía (422), límite fuera de rango (422), y una búsqueda real comprobando que cada fragmento trae
+texto, sección y cita.
+
+`/v1/preguntar` **no se prueba automáticamente**: cada corrida gastaría dinero. Se prueba a mano
+desde `/docs`, y queda escrito que es así.
+
+Diseño completo, con lo que se dejó fuera y por qué:
+[`docs/2026-08-12-api-y-mcp-diseno.md`](docs/2026-08-12-api-y-mcp-diseno.md).
+
+---
+
 ## Cómo se corre
 
 Postgres y Ollama corren en Docker en el servidor y no publican puertos, así que un túnel SSH
@@ -348,9 +422,10 @@ Esas IP de contenedor las asigna Docker y cambian cuando los contenedores se rei
 3. **El ciclo contra el corpus v3.** Si la hipótesis es que el ciclo compensa una preparación
    mala, correrlo sobre v3 —que se conserva a propósito— debería subir el 17/20 que dio ahí el
    flujo lineal. Es la casilla que falta de una tabla de cuatro.
-4. **FastAPI y MCP sobre la misma función.** Dos fachadas, un solo motor.
-5. **Desplegar con Docker, y medir `gpt-5-mini` contra un modelo local.** Esa comparación es el
+4. **Desplegar con Docker, y medir `gpt-5-mini` contra un modelo local.** Esa comparación es el
    argumento de privacidad con un número en vez de una promesa.
+5. **El evaluador en CI.** Que cada cambio corra las 20 preguntas y avise si el puntaje baja, en vez
+   de acordarse de correrlas a mano.
 
 **Sigue abierto, y se dice en vez de esconderse:** estos números son una corrida de cada uno. El
 modelo no es determinista, y dos preguntas de dieciséis no sobrevivirían a una prueba pareada. Lo
