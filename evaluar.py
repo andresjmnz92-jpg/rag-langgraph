@@ -13,11 +13,15 @@ las condiciones que lo produjeron no es un resultado.
 import os, sys, time
 from datetime import date
 from golden import PREGUNTAS
-from agente import agente, TOP_K
+from agente import agente, TOP_K, MAX_VUELTAS, MODELO, MODELO_URL
 from recuperar import TABLA
 
 PRECIO_ENTRADA = 0.13 / 1_000_000   # gpt-5-mini, verificado el 10 ago 2026
 PRECIO_SALIDA = 1.00 / 1_000_000
+# El modelo local corre en el PC de Andres: la factura es la luz, no fichas. Dejar
+# el precio de OpenAI aqui reportaria un costo que nadie pago.
+if MODELO_URL:
+    PRECIO_ENTRADA = PRECIO_SALIDA = 0.0
 
 
 def se_nego(respuesta):
@@ -48,11 +52,14 @@ def main():
     costo = entrada * PRECIO_ENTRADA + salida_t * PRECIO_SALIDA
 
     os.makedirs("resultados", exist_ok=True)
-    # El topK va en el nombre: sin el, dos corridas del mismo dia sobre la misma
-    # tabla se pisan, y la segunda borraria el resultado de la primera.
-    ruta = f"resultados/{date.today()}-{TABLA}-top{TOP_K}.md"
+    # Las condiciones van en el nombre: sin ellas, dos corridas del mismo dia se
+    # pisan y la segunda borra la primera. Los dos puntos de "qwen3:4b" no son
+    # validos en un nombre de archivo de Windows.
+    etiqueta = f"top{TOP_K}-v{MAX_VUELTAS}-{MODELO.replace(':', '-').replace('/', '-')}"
+    ruta = f"resultados/{date.today()}-{TABLA}-{etiqueta}.md"
     with open(ruta, "w", encoding="utf-8") as f:
-        f.write(f"# {TABLA} — 20 preguntas · topK {TOP_K} · {date.today()}\n\n")
+        f.write(f"# {TABLA} — 20 preguntas · topK {TOP_K} · "
+                f"max {MAX_VUELTAS} vuelta(s) · {MODELO} · {date.today()}\n\n")
         f.write(f"- Controles superados (automático): **{sum(1 for c in controles if c['ok'])}/4**\n")
         f.write(f"- Citó la sección esperada (automático): **{sum(1 for c in conresp if c['ok'])}/16**\n")
         f.write(f"- Segundos por consulta: **{sum(x['segundos'] for x in filas)/len(filas):.1f}** de media\n")
