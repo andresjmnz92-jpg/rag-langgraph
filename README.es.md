@@ -449,6 +449,99 @@ medido. La variable de entorno se queda solo mientras la semana 4 tenga que corr
 
 ---
 
+## Semana 4: cuánto cuesta la privacidad, en número
+
+Dos variables de entorno, y el redactor es lo único que cambia: `MODELO` elige el modelo y
+`MODELO_URL` apunta a Ollama, que habla el protocolo de OpenAI. `buscar`, el corpus y el prompt no
+se tocan. **Era la prueba del propio diseño y la pasó**: si cambiar la nube por un modelo local
+hubiera costado más de dos variables, la arquitectura estaba mal.
+
+El ciclo está apagado en **las dos** corridas (`MAX_VUELTAS=1`). Ya está medido como inútil (#4), y
+es lo único que infla los cuatro controles a 19.719 fichas de entrada — que no caben en 6 GB de
+VRAM. La condición se mantiene: solo cambia quién redacta.
+
+### El resultado
+
+Medido en una GTX 1660 Ti, 6 GB, Windows con el escritorio corriendo.
+
+| | `gpt-5-mini` | **`qwen3:4b` local** |
+| --- | --- | --- |
+| Contenido correcto | 13/16 | **9/16** |
+| Controles | 4/4 | **4/4** |
+| **Total** | **17/20** | **13/20** |
+| Segundos por consulta | 18,7 | **89,2** |
+| Fichas de salida, las 20 | 24.769 | **84.750** |
+| Costo de las 20 | $0,031 | **$0,000** |
+
+**El modelo local se negó en las cuatro trampas.** Ni multa del GDPR, ni certificación HIPAA, ni
+obligación colombiana, ni cláusula de IA. Un modelo de 2,5 GB en una tarjeta de consumo aguantó la
+línea que más importa en un corpus normativo.
+
+### El hallazgo que el puntaje no puede mostrar
+
+La pregunta 14 pide los cinco elementos que debe contener una notificación de brecha. **Los dos
+modelos dieron cuatro.**
+
+- **`gpt-5-mini` rellenó el quinto con texto de otra sección** — el § 164.410, que regula lo que un
+  *business associate* le reporta a la entidad cubierta, no lo que se le dice al individuo.
+- **`qwen3:4b` dio cuatro y se detuvo.**
+
+La comprobación automática puntúa las dos igual. Bajo una mirada de cumplimiento no se parecen en
+nada: **un elemento que falta es un hueco que se puede encontrar; uno fabricado es un hueco que
+parece lleno.**
+
+### Dónde falló cada uno de verdad
+
+- **La pregunta 6 falla en los dos, idéntica** — la definición de *business associate*. Su fragmento
+  con la respuesta está en el puesto 95 incluso con v4. Eso es un fallo de recuperación, no del
+  redactor, y no lo arregla cambiar de modelo.
+- **`gpt-5-mini`** perdió además la 15: devolvió seis de los ocho elementos obligatorios del aviso
+  de privacidad.
+- **`qwen3:4b`** revolvió los niveles de multa en la 12 — *"menos de $1.000 o más de $50.000 por
+  violación"* no se puede leer. Esa sola respuesta costó 177,9 segundos y 8.411 fichas de salida, lo
+  peor de las veinte. Y se dejó matices en otras: *"más de 500 individuos"* donde la norma dice
+  *"500 residentes de un estado"*, y los plazos de 30 y 60 días pelados, sin la prórroga única que
+  los dos permiten.
+
+### Dos costos que no son el puntaje
+
+**84.750 fichas de salida contra 24.769**, para respuestas que muchas veces son de seis palabras.
+qwen3 razona largo y contesta corto, y ese razonamiento se cobra como salida. Es también la razón de
+haber subido el contexto: una sola consulta de prueba gastó 2.266 + 2.449 = **4.715 fichas**, y el
+valor por defecto de Ollama, 4.096, **trunca lo que pase de ahí sin decir nada**. Medido con el
+valor por defecto, un modelo local se vería bien en las dieciséis y fallaría callado en las cuatro.
+
+**89,2 segundos contra 18,7.** Gratis no es gratis: se paga en tiempo.
+
+### Lo que esta tabla NO afirma
+
+- **Estas dos columnas se comparan entre sí, no con el 19/20 publicado en la semana 2.** Entre
+  aquella medición y esta cambiaron **dos cosas a la vez** — se quitó el ciclo *y* se endureció el
+  criterio de calificación — así que atribuir la diferencia a cualquiera de las dos repetiría el
+  error exacto que este repo se pasó tres semanas encontrando.
+- **El criterio, escrito para que se pueda discutir:** estricto. Un elemento que falta de una lista
+  obligatoria, o un matiz omitido que cambia el sentido legal, cuenta como fallo.
+- **Quién calificó:** los cuatro controles se califican solos con una frase exacta. Las 16 respuestas
+  de contenido las leyó Claude en primer pase, con Andrés fijando el criterio. **Eso no es
+  evaluación independiente**: el mismo sistema que ayudó a construir esto también lo calificó.
+- Una corrida de cada uno. Ninguno de los dos modelos es determinista.
+- **Windows con escritorio cuesta ~1,3 GB de VRAM** que un servidor Linux sin entorno gráfico no
+  paga, y los 89,2 segundos describen esta tarjeta, no hardware de servidor.
+
+### El techo de VRAM, medido
+
+| `num_ctx` | tamaño del modelo | dónde corre |
+| --- | --- | --- |
+| 4.096 | 3,2 GB | 100% GPU |
+| 8.192 | 3,9 GB | **100% GPU** |
+| 16.384 | 5,4 GB | 21% CPU / 79% GPU |
+| 24.576 | 6,7 GB | 37% CPU / 63% GPU |
+
+**8.192 es el techo con 6 GB.** Pasado eso el modelo se parte y la latencia deja de describir a una
+GPU. Estas corridas usaron 8.192, verificado al 100% en GPU en las veinte consultas.
+
+---
+
 ## Qué sigue
 
 1. **Una métrica de recuperación que mida el fragmento, no la sección.** La actual reportaba 16/16

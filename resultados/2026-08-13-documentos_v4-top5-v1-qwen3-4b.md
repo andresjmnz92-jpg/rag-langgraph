@@ -5,7 +5,7 @@
 - Segundos por consulta: **89.2** de media
 - Fichas: 50,529 entrada + 84,750 salida — **$0.000** las 20
 
-La columna **Contenido** va vacía a propósito: es la que no puede llenar un script.
+Calificado el 13 ago 2026: primer pase de Claude, criterio estricto elegido por Andres (si falta un elemento de una lista o un matiz que cambia el sentido legal, es fallo). NO es evaluacion independiente: la califica el mismo sistema que ayudo a construirla.
 
 ## 1. ¿Qué plazo tiene una entidad para notificar a los individuos afectados por una brecha?
 
@@ -17,7 +17,7 @@ La columna **Contenido** va vacía a propósito: es la que no puede llenar un sc
 
 > 60 días calendario (§ 164.404(b))
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [x]**
 
 ---
 
@@ -31,7 +31,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 
 > Más de 500 individuos [Seccion 164.406 - 45 CFR 164.406]
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [ ] FALLO**
 
 ---
 
@@ -45,7 +45,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 
 > Para brechas de 500 o más individuos: contemporáneamente con la notificación requerida en § 164.404(a) (Sección 164.408b). Para brechas menores a 500 individuos: no más de 60 días después del final de cada año calendario (Sección 164.408c).
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [x]**
 
 ---
 
@@ -59,7 +59,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 
 > 60 días calendario. [Seccion 164.410 - 45 CFR 164.410]
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [x]**
 
 ---
 
@@ -73,7 +73,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 
 > 6 años. [Seccion 164.316 - 45 CFR 164.316]
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [x]**
 
 ---
 
@@ -87,7 +87,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 
 > Un negocio asociado es una persona que ofrece un registro de salud personal a uno o más individuos por cuenta de una entidad cubierta, o un subcontratista que crea, recibe, mantiene o transmite información protegida de salud por cuenta del negocio asociado. (Sección 160.103 - 45 CFR 160.103)
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [ ] FALLO**
 
 ---
 
@@ -103,7 +103,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 
 > Breach se define como: "the acquisition, access, use, or disclosure of protected health information in a manner not permitted under subpart E of this part which compromises the security or privacy of the protected health information" (Sección 164.402).
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [x]**
 
 ---
 
@@ -121,7 +121,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 > - [Seccion 164.310] (Physical safeguards)  
 > - [Seccion 164.312] (Technical safeguards)
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [x]**
 
 ---
 
@@ -135,7 +135,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 
 > 30 días (Sección 164.524)
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [ ] FALLO**
 
 ---
 
@@ -149,7 +149,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 
 > 60 días (45 CFR § 164.526)
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [ ] FALLO**
 
 ---
 
@@ -163,7 +163,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 
 > Los seis años anteriores a la fecha de solicitud o un período más corto a solicitud del individuo según el inciso (a)(3) de esta sección. (Fragmento 1)
 
-Cita/negativa: ❌ · **Contenido: [ ]**
+Cita/negativa: ❌ · **Contenido: [x]**
 
 ---
 
@@ -182,7 +182,7 @@ Cita/negativa: ❌ · **Contenido: [ ]**
 
 > Menos de $1,000 o más de $50,000 por violación, menos de $50,000 por violación, menos de $10,000 o más de $50,000 por violación, más de $1,500,000 para violaciones idénticas anuales y más de $25,000 para violaciones idénticas anuales (antes de febrero de 2009).
 
-Cita/negativa: ❌ · **Contenido: [ ]**
+Cita/negativa: ❌ · **Contenido: [ ] FALLO**
 
 ---
 
@@ -201,7 +201,7 @@ Cita/negativa: ❌ · **Contenido: [ ]**
 
 > Los factores son: naturaleza y extensión del incumplimiento; naturaleza y extensión de los daños; historial de cumplimiento previo; condición financiera del ente cubierto y otros aspectos que justifiquen. [Seccion 160.408 - 45 CFR 160.408]
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [x]**
 
 ---
 
@@ -221,7 +221,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 
 > Los elementos son: (A) Una descripción breve de lo ocurrido, incluyendo la fecha de la brecha y la fecha de descubrimiento si es conocida; (B) Descripción de los tipos de información protegida no segura involucrados; (C) Pasos que los individuos deben tomar para protegerse; (D) Breve descripción de las acciones del ente cubierto para investigar, mitigar daños y prevenir futuras brechas. [Sección 164.404(c)(1)]
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [ ] FALLO**
 
 ---
 
@@ -244,7 +244,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 
 > El Notice of Privacy Practices debe incluir: encabezado específico, descripción de usos y revelaciones (con ejemplo), declaración de cumplimiento con notificación vigente, declaración de derecho a cambiar la notificación y proporcionarla revisada, información de contacto, fecha de efectividad y sección de quejas (45 CFR § 164.520).
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [ ] FALLO**
 
 ---
 
@@ -265,7 +265,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 
 > (i) Divulgaciones o solicitudes por parte de proveedores de salud para tratamiento; (ii) Uso o divulgación al individuo; (iii) Uso o divulgación bajo autorización § 164.508; (iv) Divulgaciones al Secretario conforme con subparte C del parte 160; (v) Uso o divulgación requerido por ley § 164.512(a); (vi) Uso o divulgación requerido para cumplir requisitos de esta subsección. [Seccion 164.502 - 45 CFR 164.502]
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [x]**
 
 ---
 
