@@ -5,7 +5,7 @@
 - Segundos por consulta: **18.7** de media
 - Fichas: 44,526 entrada + 24,769 salida — **$0.031** las 20
 
-La columna **Contenido** va vacía a propósito: es la que no puede llenar un script.
+Calificado el 13 ago 2026: primer pase de Claude, criterio estricto elegido por Andres (si falta un elemento de una lista o un matiz que cambia el sentido legal, es fallo). NO es evaluacion independiente: la califica el mismo sistema que ayudo a construirla.
 
 ## 1. ¿Qué plazo tiene una entidad para notificar a los individuos afectados por una brecha?
 
@@ -17,7 +17,7 @@ La columna **Contenido** va vacía a propósito: es la que no puede llenar un sc
 
 > Sin demora indebida y, en ningún caso, más tarde de 60 días calendario después del descubrimiento de la brecha. (Sección 164.404 - 45 CFR 164.404)
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [x]**
 
 ---
 
@@ -31,7 +31,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 
 > Cuando el incumplimiento afecta a más de 500 residentes de un Estado o jurisdicción. (Seccion 164.406 - 45 CFR 164.406)
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [x]**
 
 ---
 
@@ -49,7 +49,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 > 
 > - Si la brecha involucra menos de 500 individuos, debe mantenerse un registro y notificar al Secretary no más tarde de 60 días después del fin de cada año calendario por las brechas descubiertas durante el año precedente, en la forma especificada en el sitio web del HHS. (Seccion 164.408 - 45 CFR 164.408)
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [x]**
 
 ---
 
@@ -63,7 +63,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 
 > Un business associate debe notificar "sin demora indebida y en ningún caso más tarde de 60 días calendario después del descubrimiento de la brecha." (Sección 164.410 - 45 CFR 164.410)
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [x]**
 
 ---
 
@@ -79,7 +79,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 > 
 > Fuente: Seccion 164.316 - 45 CFR 164.316; Seccion 164.530 - 45 CFR 164.530.
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [x]**
 
 ---
 
@@ -102,7 +102,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 > 
 > Fuente: Sección 160.103 - 45 CFR 160.103.
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [ ] FALLO**
 
 ---
 
@@ -119,7 +119,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 > "Breach" significa: la adquisición, acceso, uso o divulgación de protected health information en una forma no permitida bajo el subapartado E de esta parte que compromete la seguridad o privacidad de la protected health information. Se excluye: cualquier adquisición, acceso o uso no intencional de protected health information por un miembro de la fuerza laboral o persona que actúe bajo la autoridad de un covered entity o business associate, si tal adquisición, acceso o uso se hizo de buena fe y dentro del ámbito de la autoridad y no resulta en un uso o divulgación adicional de forma no permitida bajo el subapartado E de esta parte.  
 > Fuente: Seccion 164.402 - 45 CFR 164.402.
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [x]**
 
 ---
 
@@ -133,7 +133,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 
 > Las tres categorías son: Administrative safeguards (§ 164.308 - 45 CFR 164.308); Technical safeguards (§ 164.312 - 45 CFR 164.312); Physical safeguards (§ 164.310 - 45 CFR 164.310).
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [x]**
 
 ---
 
@@ -147,7 +147,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 
 > La entidad debe actuar a más tardar 30 días desde la recepción de la solicitud. Puede extender ese plazo una sola vez por hasta 30 días si, dentro del plazo original, entrega por escrito las razones del retraso y la nueva fecha de cumplimiento. Fuente: Sección 164.524 - 45 CFR 164.524.
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [x]**
 
 ---
 
@@ -161,7 +161,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 
 > La entidad debe actuar no más tarde de 60 días desde la recepción de la solicitud. Puede extenderse una sola vez hasta 30 días adicionales si, dentro del plazo original, la entidad entrega por escrito las razones del retraso y la fecha en que completará la acción. (Sección 164.526 - 45 CFR 164.526)
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [x]**
 
 ---
 
@@ -175,7 +175,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 
 > Cubre los seis años anteriores a la fecha de la solicitud, o un período más corto si el individuo lo solicita conforme al párrafo (a)(3). Fuente: Seccion 164.528 - 45 CFR 164.528.
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [x]**
 
 ---
 
@@ -203,7 +203,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 > 
 > Fuente: Sección 160.404 - 45 CFR 160.404.
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [x]**
 
 ---
 
@@ -228,7 +228,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 > 
 > Fuente: Sección 160.408 - 45 CFR 160.408.
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [x]**
 
 ---
 
@@ -265,7 +265,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 > - "La identificación de cada individuo cuya información de salud protegida no asegurada ha sido, o que el asociado de negocios razonablemente cree que ha sido, accedida, adquirida, usada, o divulgada durante la brecha."  
 >   Fuente: Seccion 164.410 - 45 CFR 164.410 (c)(1)
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [ ] FALLO**
 
 ---
 
@@ -301,7 +301,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 > 
 > Fuente: Seccion 164.520 - 45 CFR 164.520.
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [ ] FALLO**
 
 ---
 
@@ -331,7 +331,7 @@ Cita/negativa: ✅ · **Contenido: [ ]**
 > 
 > Fuente: § 164.502 - 45 CFR 164.502.
 
-Cita/negativa: ✅ · **Contenido: [ ]**
+Cita/negativa: ✅ · **Contenido: [x]**
 
 ---
 

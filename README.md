@@ -444,6 +444,96 @@ measuring. The environment variable stays only while week 4 needs to run both.
 
 ---
 
+## Week 4: what privacy costs, in a number
+
+Two environment switches, and the writer is the only thing that changes: `MODELO` picks the model,
+`MODELO_URL` points at Ollama — which speaks the OpenAI protocol. `buscar`, the corpus and the
+prompt are untouched. **That was the architecture's own test and it passed**: if swapping the cloud
+for a local model had cost more than two variables, the design was wrong.
+
+The loop is off in **both** runs (`MAX_VUELTAS=1`). It is already measured as useless (#4), and it
+is the only thing that inflates the four controls to 19,719 input tokens — which do not fit in 6 GB
+of VRAM. The condition still holds: only the writer changes.
+
+### The result
+
+Measured on a GTX 1660 Ti, 6 GB, Windows with the desktop running.
+
+| | `gpt-5-mini` | **`qwen3:4b` local** |
+| --- | --- | --- |
+| Content correct | 13/16 | **9/16** |
+| Controls | 4/4 | **4/4** |
+| **Total** | **17/20** | **13/20** |
+| Seconds per query | 18.7 | **89.2** |
+| Output tokens, all 20 | 24,769 | **84,750** |
+| Cost of the 20 | $0.031 | **$0.000** |
+
+**The local model refused all four traps.** No invented GDPR fine, no HIPAA certification, no
+Colombian obligation, no AI clause. A 2.5 GB model on a consumer card held the line that matters
+most in a compliance corpus.
+
+### The finding the score cannot show
+
+Question 14 asks for the five elements a breach notice must contain. **Both models gave four.**
+
+- **`gpt-5-mini` filled the fifth with text from a different section** — § 164.410, which governs
+  what a business associate reports to a covered entity, not what an individual is told.
+- **`qwen3:4b` gave four and stopped.**
+
+The automatic check scores those identically. Under a compliance lens they are not remotely the
+same: **a missing element is a gap you can find; a fabricated one is a gap that looks filled.**
+
+### Where each one actually failed
+
+- **Question 6 fails on both, identically** — the definition of *business associate*. Its answering
+  chunk sits at rank 95 even under v4. That is a retrieval failure, not a writer one, and no model
+  swap can fix it.
+- **`gpt-5-mini`** also lost 15, returning six of the eight required elements of a privacy notice.
+- **`qwen3:4b`** scrambled the civil penalty tiers in question 12 — *"less than $1,000 or more than
+  $50,000 per violation"* parses to nothing. That single answer cost 177.9 seconds and 8,411 output
+  tokens, the worst of the twenty. It also dropped qualifiers elsewhere: *"more than 500
+  individuals"* where the rule says *"500 residents of a State"*, and the bare 30- and 60-day
+  deadlines without the one-time extension both carry.
+
+### Two costs that are not the score
+
+**84,750 output tokens against 24,769**, for answers often six words long. qwen3 reasons at length
+and answers briefly, and the reasoning is billed as output. It is also why the context had to be
+raised: one smoke-test query spent 2,266 + 2,449 = **4,715 tokens**, and Ollama's 4,096 default
+**truncates past that without a word**. Measured at the default, a local model would look fine on
+the sixteen and fail the four in silence.
+
+**89.2 seconds against 18.7.** Free is not free. It is paid in time.
+
+### What this does not claim
+
+- **These two columns compare to each other, not to the 19/20 published in week 2.** Between those
+  measurements two things changed at once — the loop came off *and* the grading criterion was
+  tightened — so attributing the difference to either would repeat the exact mistake this repo spent
+  three weeks finding.
+- **The criterion, stated so it can be argued with:** strict. A missing element from a required
+  list, or a dropped qualifier that changes the legal meaning, counts as a failure.
+- **Who graded:** the four controls grade themselves on an exact phrase. The 16 content answers were
+  read by Claude in a first pass, with Andrés setting the criterion. **That is not independent
+  evaluation** — the same system that helped build this also graded it.
+- One run each. Neither model is deterministic.
+- **Windows with a desktop costs ~1.3 GB of VRAM** a headless Linux server does not pay, and 89.2
+  seconds describes this card, not server hardware.
+
+### The VRAM ceiling, measured
+
+| `num_ctx` | model size | where it runs |
+| --- | --- | --- |
+| 4,096 | 3.2 GB | 100% GPU |
+| 8,192 | 3.9 GB | **100% GPU** |
+| 16,384 | 5.4 GB | 21% CPU / 79% GPU |
+| 24,576 | 6.7 GB | 37% CPU / 63% GPU |
+
+**8,192 is the ceiling on 6 GB.** Past it the model splits and the latency stops describing a GPU.
+These runs used 8,192, verified at 100% GPU across all twenty queries.
+
+---
+
 ## What's next
 
 1. **A retrieval metric that measures the chunk, not the section.** The current one reported 16/16
