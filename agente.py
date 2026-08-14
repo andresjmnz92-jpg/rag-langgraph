@@ -6,7 +6,10 @@ from recuperar import buscar_fragmentos
 
 # El mismo tope que el agente de n8n. No es una meta: la ejecucion 551 acerto
 # con dos vueltas. Es el freno de mano por si el juez nunca se da por satisfecho.
-MAX_VUELTAS = 5
+# Con 1 el ciclo no gira nunca, que es como corre la comparacion contra el modelo
+# local: el ciclo esta medido como inutil (PR #4) y es lo unico que infla los
+# controles a 19.719 fichas, que no caben en los 6 GB de una GTX 1660 Ti.
+MAX_VUELTAS = int(os.environ.get("MAX_VUELTAS", 5))
 
 # 20 se heredo del chat de n8n y nadie lo midio. Medido el 12 ago: con 5 el
 # puntaje automatico no se movio y la entrada bajo 3,4 veces, asi que 5 es el
@@ -51,9 +54,19 @@ class Estado(TypedDict):
     uso: Annotated[dict, sumar_uso]
 
 
+# Ollama habla el mismo protocolo que OpenAI, asi que cambiar de la nube al
+# modelo local es apuntar MODELO_URL a localhost:11434/v1. Si esto costara mas
+# que dos variables, el diseno estaria mal: buscar, el corpus y el prompt no se
+# tocan, y lo unico que cambia es quien redacta.
+MODELO = os.environ.get("MODELO", "gpt-5-mini")
+MODELO_URL = os.environ.get("MODELO_URL")  # vacio = la nube de OpenAI
+
+
 def preguntar_al_modelo(sistema, usuario):
-    r = OpenAI().chat.completions.create(
-        model="gpt-5-mini",
+    # Ollama exige una api_key aunque la ignore; el SDK se niega a arrancar sin ella.
+    cliente = OpenAI(base_url=MODELO_URL, api_key="local") if MODELO_URL else OpenAI()
+    r = cliente.chat.completions.create(
+        model=MODELO,
         messages=[{"role": "system", "content": sistema},
                   {"role": "user", "content": usuario}],
     )
